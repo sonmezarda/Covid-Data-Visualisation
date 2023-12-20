@@ -81,7 +81,7 @@ class CovidHelper:
         if type(country) == list:
             df = pd.DataFrame()
             for c in country:
-                countryData = self.getbyCountry(c, dropIndex=False)
+                countryData = self.getbyCountry(c, dropIndex=dropIndex)
                 if countryData.empty:
                     continue
 
@@ -124,10 +124,11 @@ def test():
     print("Loading...")
     st = time.time()
     #df = cHelper.getDateIntervalbyCountry(datetime.date(2022, 10, 1), datetime.date(2022, 11, 1), list(cHelper.getCountryList()))
-    df = cHelper.getbyCountry(cHelper.getCountryList())
+    df = cHelper.getDateIntervalbyCountry("2022-01-10", "2022-01-15", ["Türkiye", "Yemen"], dropIndex=True)
     ft = time.time()
-    print(f"Time1: {ft-st}")
     print(df)
+    print(f"Time1: {ft-st}")
+    
 
 
 if __name__ == "__main__":
