@@ -72,7 +72,7 @@ class CovidHelper:
             return self.global_data.query(f"Date_reported >= '{str(startDate)}'").query(f"Date_reported <= '{str(endDate)}'")
 
         if type(country) == str:
-            countryData = self.getbyCountry(country, dropIndex=False)
+            countryData = self.getbyCountry(country, dropIndex=dropIndex)
             if countryData.empty:
                 return countryData
             
