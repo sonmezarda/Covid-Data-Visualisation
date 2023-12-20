@@ -42,11 +42,18 @@ class CovidHelper:
         return self.global_data["Country"].drop_duplicates().reset_index(drop=dropIndex)
 
     @checkGlobalData
-    def getCountryData(self, country:str, dropIndex:bool=True) -> pd.DataFrame:
-        return self.global_data[self.global_data["Country"]==country].reset_index(drop=dropIndex)
+    def getbyCountry(self, country:str|list[str], dropIndex:bool=True) -> pd.DataFrame:
+        if type(country) == str:
+            return self.global_data[self.global_data["Country"]==country].reset_index(drop=dropIndex)
+        
+        df = pd.DataFrame()
+        for c in country:
+            countryData = self.getbyCountry(c, dropIndex=dropIndex)
+            df = pd.concat([df, countryData])
+        return df
 
     @checkGlobalData
-    def getDateData(self, date:str|datetime.date, dropIndex:bool=True) -> pd.DataFrame:
+    def getbyDate(self, date:str|datetime.date, dropIndex:bool=True) -> pd.DataFrame:
         if type(date) == datetime.date:
             return self.global_data[self.global_data["Date_reported"] == str(date)].reset_index(drop=dropIndex)
         elif type(date) == str:
@@ -65,7 +72,7 @@ class CovidHelper:
             return self.global_data.query(f"Date_reported >= '{str(startDate)}'").query(f"Date_reported <= '{str(endDate)}'")
 
         if type(country) == str:
-            countryData = self.getCountryData(country, dropIndex=False)
+            countryData = self.getbyCountry(country, dropIndex=False)
             if countryData.empty:
                 return countryData
             
@@ -74,13 +81,13 @@ class CovidHelper:
         if type(country) == list:
             df = pd.DataFrame()
             for c in country:
-                countryData = self.getCountryData(c, dropIndex=False)
+                countryData = self.getbyCountry(c, dropIndex=False)
                 if countryData.empty:
                     continue
-                firstDateIndex = countryData[countryData["Date_reported"] == str(startDate)].iloc[0]["index"]
-                lastDateIndex = countryData[countryData["Date_reported"] == str(endDate)].iloc[0]["index"]
-                frames = [df, self.global_data.loc[firstDateIndex:lastDateIndex]]
-                df = pd.concat(frames)
+
+                countryDataInterval = countryData.query(f"Date_reported >= '{str(startDate)}'").query(f"Date_reported <= '{str(endDate)}'")
+                frames = [df, countryDataInterval]
+                df = pd.concat(frames).reset_index(drop=dropIndex)
             return df
 
 
@@ -109,9 +116,6 @@ class CovidHelper:
         else:
             raise FileNotFoundError("CSV File Not Found and Could Not be Downloaded")
 
-    def buf():
-        pass
-
 
 
 def test():
@@ -119,13 +123,11 @@ def test():
     cHelper = CovidHelper()
     print("Loading...")
     st = time.time()
-    df = cHelper.getDateIntervalbyCountry(datetime.date(2022, 10, 1), datetime.date(2022, 11, 1), "Yemen")
+    #df = cHelper.getDateIntervalbyCountry(datetime.date(2022, 10, 1), datetime.date(2022, 11, 1), list(cHelper.getCountryList()))
+    df = cHelper.getbyCountry(cHelper.getCountryList())
     ft = time.time()
     print(f"Time1: {ft-st}")
     print(df)
-
-
-    #print(d)
 
 
 if __name__ == "__main__":
