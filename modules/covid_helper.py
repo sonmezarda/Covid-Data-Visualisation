@@ -12,7 +12,6 @@ class CovidConstants:
     allDataUrl = "https://covid19.who.int/WHO-COVID-19-global-data.csv"
     allDataName = "data/WHO-COVID-19-global-data.csv"
     tableDataUrl = "https://covid19.who.int/WHO-COVID-19-global-table-data.csv"
-    vaccinationDataUrl = "https://covid19.who.int/who-data/vaccination-metadata.csv"
 
 class CovidHelper:
     def __init__(self):
