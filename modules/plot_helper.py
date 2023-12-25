@@ -35,11 +35,14 @@ class PlotHelper:
 def test():
     pltHelper = PlotHelper()
     cHelper = CovidHelper()
-    df = cHelper.getbyCountry(["Türkiye", "Iran (Islamic Republic of)"], dropIndex=True)
+    df1 = cHelper.getDateIntervalbyCountry("2022-01-01", "2022-05-01", ["Türkiye","Germany"], dropIndex=True)
+
     fig, axs = plt.subplots(1,1)
     fig.autofmt_xdate()
     #pltHelper.plotBasic(axs[0],df,"Cumulative_cases")
-    pltHelper.plotBasic(axs, df, "New_cases")
+    pltHelper.plotBasic(axs, df1, "Cumulative_cases")
+
+
 
     plt.show()
 

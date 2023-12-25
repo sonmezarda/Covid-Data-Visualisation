@@ -125,6 +125,7 @@ def test():
     st = time.time()
     #df = cHelper.getDateIntervalbyCountry(datetime.date(2022, 10, 1), datetime.date(2022, 11, 1), list(cHelper.getCountryList()))
     df = cHelper.getDateIntervalbyCountry("2022-01-10", "2022-01-15", ["Türkiye", "Yemen"], dropIndex=True)
+    
     ft = time.time()
     print(df)
     print(f"Time1: {ft-st}")
