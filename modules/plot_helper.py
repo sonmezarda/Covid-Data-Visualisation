@@ -11,23 +11,26 @@ class PlotHelper:
         pass
 
     def plotBasic(self,ax:plt.Axes, df:pd.DataFrame, plotType:str="New_cases", dayTextInterval:int=10, **kwargs):
-        
         #fig.autofmt_xdate()
         ax.grid()
         ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
         ax.xaxis.set_major_locator(mdates.DayLocator(interval=dayTextInterval))
-        #ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-
+        intervalStr = "Per Day"
         for country in df["Country"].drop_duplicates():
-            print(df)
             countryData = df[df["Country"] == country]
-            lenght = countryData.shape[0]
-            #x = np.arange(0, lenght, 1)
-            y = countryData[plotType]
+            if "Weekly" in plotType: 
+                plotType=plotType.replace("Weekly_","")
+                intervalStr = "Rolling Week"
+                #countryData = countryData.set_index('Date_reported')
+                y = countryData[plotType].rolling(7, min_periods=1).mean().round()
+
+            else:
+                y = countryData[plotType]
             ax.plot(countryData["Date_reported"], y, label=country,**kwargs)
+            ax.set_xlim(0,len(y))
             ax.legend()
-            yLabel = ' '.join(plotType.split('_')).capitalize() + " (Per Day)"
-            ax.set(xlabel="Date", ylabel=yLabel, title=f"New Cases (From {countryData['Date_reported'].iloc[0]} to {countryData['Date_reported'].iloc[-1]})")
+            yLabel = ' '.join(plotType.split('_')).capitalize() + f" ({intervalStr})"
+            ax.set(xlabel="Date", ylabel=yLabel, title=f"{plotType.replace('_',' ').capitalize()} (From {countryData['Date_reported'].iloc[0]} to {countryData['Date_reported'].iloc[-1]})")
 
         return ax
 
@@ -41,8 +44,6 @@ def test():
     fig.autofmt_xdate()
     #pltHelper.plotBasic(axs[0],df,"Cumulative_cases")
     pltHelper.plotBasic(axs, df1, "Cumulative_cases")
-
-
 
     plt.show()
 

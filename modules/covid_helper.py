@@ -37,8 +37,11 @@ class CovidHelper:
         return self.global_data
 
     @checkGlobalData
-    def getCountryList(self, dropIndex:bool=True) -> pd.DataFrame:
-        return self.global_data["Country"].drop_duplicates().reset_index(drop=dropIndex)
+    def getCountryList(self,includeCode=False, dropIndex:bool=True) -> pd.DataFrame:
+        if not includeCode:
+            return self.global_data["Country"].drop_duplicates().reset_index(drop=dropIndex)
+        else:
+            return (self.global_data['Country'] +" - "+ self.global_data['Country_code']).drop_duplicates().reset_index(drop=dropIndex)
 
     @checkGlobalData
     def getbyCountry(self, country:str|list[str], dropIndex:bool=True) -> pd.DataFrame:
@@ -121,14 +124,14 @@ def test():
     CovC = CovidConstants
     cHelper = CovidHelper()
     print("Loading...")
-    st = time.time()
-    #df = cHelper.getDateIntervalbyCountry(datetime.date(2022, 10, 1), datetime.date(2022, 11, 1), list(cHelper.getCountryList()))
-    df = cHelper.getDateIntervalbyCountry("2022-01-10", "2022-01-15", ["Türkiye", "Yemen"], dropIndex=True)
+    # st = time.time()
+    # #df = cHelper.getDateIntervalbyCountry(datetime.date(2022, 10, 1), datetime.date(2022, 11, 1), list(cHelper.getCountryList()))
+    # df = cHelper.getDateIntervalbyCountry("2022-01-10", "2022-01-15", ["Türkiye", "Yemen"], dropIndex=True)
     
-    ft = time.time()
-    print(df)
-    print(f"Time1: {ft-st}")
-    
+    # ft = time.time()
+    # print(df)
+    # print(f"Time1: {ft-st}")
+    print(cHelper.getCountryList(True,True))
 
 
 if __name__ == "__main__":

@@ -41,6 +41,13 @@ class MCombobox(qt.QComboBox):
         if selections != None:
             self.addItems(selections)
 
+class MSpinBox(qt.QSpinBox):
+    def __init__(self, min:int=0, max:int=0, start:int=0):
+        super().__init__()
+        self.setMinimum(min)
+        self.setMaximum(max)
+        self.setValue(start)
+
 # My custom QT Widgets
 class SearchWidget(qt.QWidget):
     def __init__(self,lbltext:str):
@@ -86,8 +93,8 @@ class CountryScroll(MScrollArea):
         
     def createCountryList(self):
         self.checkBoxList:list[CountryCheckBox] = list()
-        
         for country in self.countries:
+            if(type(country) != str): continue
             Cbox = CountryCheckBox(country)
             self.checkBoxList.append(Cbox)
             self.main_layout.addWidget(Cbox)
@@ -100,7 +107,7 @@ class CountryScroll(MScrollArea):
                 country.setVisible(False)
     
     def getCheckedCountries(self)->list[str]:
-        checkedCountries = [country.countryName for country in self.checkBoxList if country.isChecked()]
+        checkedCountries = [country.countryName.split(' - ')[0] for country in self.checkBoxList if country.isChecked()]
 
         return checkedCountries
 
@@ -110,19 +117,33 @@ class GraphSettingForm(qt.QWidget):
 
         formLayout = qt.QFormLayout()
         self.formLayout = formLayout
-        self.startDate = MDateEdit(QtCore.QDate(2022,1,1))
+        self.startDate = MDateEdit(QtCore.QDate(2021,6,1))
         self.endDate = MDateEdit(QtCore.QDate(2022,1,1))
         self.dataMetric = MCombobox(["Confirmed Cases","Confirmed Deaths"])
-        self.dataInterval = MCombobox(["New Per Day","Cumulative"])
-        self.splitByCountry = MCheckBox()
+        self.dataInterval = MCombobox(["New Per Day","Cumulative", "Weekly"])
+        self.splitByCountry = MCheckBox("")
+        self.alignAxisScales = MCheckBox("")
+        self.markerType = MCombobox(["Circle - o","None","Star - *", "Point - .", "Pixel - ,", "X - x", "Plus - +", "Plus (Filled) - P", "Square - s", "Hexagon - H"])
+        self.markerSize = MSpinBox(0,10,3)
+        self.showGraphButton = MPushButton('Show Graph')
+        self.dateTextInterval = MSpinBox(1,30,7)
+
+        pltSettingsLbl = MLabel('Plot Settings')
+        pltSettingsLbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         formLayout.addRow(MLabel('Start Date: '), self.startDate)
         formLayout.addRow(MLabel('End Date: '), self.endDate)
         formLayout.addRow(MLabel('Metric: '), self.dataMetric)
         formLayout.addRow(MLabel('Interval: '), self.dataInterval)
         formLayout.addRow(MLabel('Split by Country: '), self.splitByCountry)
-
-        formLayout.addRow(MPushButton('Show Graph'))
+        formLayout.addRow(MLabel('Align Axis Scales: '), self.alignAxisScales)
+        
+        formLayout.addRow(pltSettingsLbl)
+        formLayout.addRow(MLabel('Marker Type: '), self.markerType)
+        formLayout.addRow(MLabel('Marker Size: '), self.markerSize)
+        formLayout.addRow(MLabel('X axis Date Interval: '), self.dateTextInterval)
+        
+        formLayout.addRow(self.showGraphButton)
 
         self.setLayout(self.formLayout)
 
@@ -131,21 +152,39 @@ class GraphSettingForm(qt.QWidget):
         startDate = self.startDate.date()
         endDate = self.endDate.date()
 
-        settings["startDate"] = f"{startDate.year()}-{startDate.month()}-{startDate.day()}" 
-        settings["endDate"] = f"{endDate.year()}-{endDate.month()}-{endDate.day()}"
+        settings["startDate"] = f"{startDate.year()}-{startDate.month():02d}-{startDate.day():02d}" 
+        settings["endDate"] = f"{endDate.year()}-{endDate.month():02d}-{endDate.day():02d}"
         settings["splitByCountry"] = self.splitByCountry.isChecked()
 
+        settings["column"] = ""
+        if self.dataInterval.currentText() == "New Per Day":
+            settings["column"] = "New"
+        elif self.dataInterval.currentText() == "Cumulative":
+            settings["column"] = "Cumulative"
+        elif self.dataInterval.currentText() == "Weekly":
+            settings["column"] = "Weekly_New"
+
         if self.dataMetric.currentText() == "Confirmed Cases":
-            if self.dataInterval.currentText() == "New Per Day":
-                settings["column"] = "New_cases"
-            elif self.dataInterval.currentText() == "Cumulative":
-                settings["column"] = "Cumulative_cases"
+            settings["column"]+="_cases"
         elif self.dataMetric.currentText() == "Confirmed Deaths":
-            if self.dataInterval.currentText() == "New Per Day":
-                settings["column"] = "New_deaths"
-            elif self.dataInterval.currentText() == "Cumulative":
-                settings["column"] = "Cumulative_deaths"
-        else:
-            settings["column"] = "error"
+            settings["column"]+="_deaths"
+
         
+        if self.markerType.currentText() == "None":
+            settings["marker"] = None
+        else:
+            settings["marker"] = self.markerType.currentText()[-1]
+
+        settings["markerSize"] = self.markerSize.value()
+        settings["dateInterval"] = self.dateTextInterval.value()
+        
+        print(settings)
         return settings
+    
+### Errors
+
+def showError(errormsg):
+    dialog = qt.QDialog()
+    dialog.setWindowTitle("ERROR")
+    dialog.exec()
+

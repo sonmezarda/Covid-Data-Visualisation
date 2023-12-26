@@ -1,11 +1,16 @@
 from __future__ import annotations
 
-from modules.covid_helper import test as covidTest
-from modules.covid_helper import CovidHelper
-from modules.plot_helper import test as pltTest
-from modules.pyqt_helper import SearchWidget, CountryScroll, MDateEdit, MPushButton, MCombobox, GraphSettingForm
+import matplotlib.pyplot as plt
 import PyQt5.QtWidgets as qt
 import PyQt5.QtCore as QtCore
+
+from modules.covid_helper import test as covidTest
+from modules.covid_helper import CovidHelper
+from modules.plot_helper import PlotHelper
+
+from modules.plot_helper import test as pltTest
+from modules.pyqt_helper import SearchWidget, CountryScroll, MDateEdit, MPushButton, MCombobox, GraphSettingForm
+
 
 def main():
     app = qt.QApplication([])
@@ -13,7 +18,7 @@ def main():
     #window = qt.QWidget()#MainWindow()
     window = MainWindow()
     #window.setLayout(ly)
-    countryScroll = CountryScroll(covid.getCountryList())
+    countryScroll = CountryScroll(covid.getCountryList(True, True))
 
     sw = SearchWidget("Country Name: ")
     sw.lineEdit.textChanged.connect(lambda: countryScroll.filterCountries(sw.lineEdit.text()))
@@ -25,14 +30,24 @@ def main():
     window.main_layout.addWidget(sw, 1, 1)
     window.main_layout.addWidget(countryScroll, 2, 1)
     window.main_layout.addWidget(gsettings, 2,2)
-    #window.main_layout.addWidget(startDate, 1, 2)
 
     window.main_layout.addWidget(testButton, 3,2)
-    #window.main_layout.addWidget(caseSetting, 2,3) 
-    testButton.clicked.connect(lambda: print(gsettings.getSettings()))
+    gsettings.showGraphButton.clicked.connect(lambda: showGraphButtonClick(gsettings.getSettings(), countryScroll.getCheckedCountries()))
 
     window.show()
     app.exec()
+
+def showGraphButtonClick(settings, countries):
+    covid = CovidHelper()
+    plotter = PlotHelper()
+    covid.loadGlobalData()
+
+    if not settings["splitByCountry"]:
+        df = covid.getDateIntervalbyCountry(settings["startDate"], settings["endDate"], countries, dropIndex=True)
+        fig, ax = plt.subplots(1,1)
+        fig.autofmt_xdate()
+        plotter.plotBasic(ax, df, plotType=settings["column"], dayTextInterval=settings["dateInterval"], marker=settings["marker"], ms=settings["markerSize"])
+        plt.show()
 
 class MainWindow(qt.QMainWindow):
     def __init__(self):
