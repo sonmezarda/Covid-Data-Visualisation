@@ -10,7 +10,7 @@ class PlotHelper:
     def __init__(self):
         pass
 
-    def plotBasic(self,ax:plt.Axes, df:pd.DataFrame, plotType:str="New_cases", dayTextInterval:int=10, **kwargs):
+    def plotBasic(self, ax:plt.Axes, df:pd.DataFrame, plotType:str="New_cases", dayTextInterval:int=10, **kwargs):
         #fig.autofmt_xdate()
         ax.grid()
         ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))

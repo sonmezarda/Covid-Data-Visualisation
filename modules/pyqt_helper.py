@@ -77,7 +77,6 @@ class CountryScroll(MScrollArea):
         self.main_widget = qt.QWidget()
         self.main_layout = qt.QVBoxLayout()
         
-
         self.main_widget.setLayout(self.main_layout)
 
         self.setWidget(self.main_widget)
@@ -127,10 +126,12 @@ class GraphSettingForm(qt.QWidget):
         self.markerSize = MSpinBox(0,10,3)
         self.showGraphButton = MPushButton('Show Graph')
         self.dateTextInterval = MSpinBox(1,30,7)
+        self.lineWidth = MSpinBox(1,10,2)
 
         pltSettingsLbl = MLabel('Plot Settings')
         pltSettingsLbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
+        
         formLayout.addRow(MLabel('Start Date: '), self.startDate)
         formLayout.addRow(MLabel('End Date: '), self.endDate)
         formLayout.addRow(MLabel('Metric: '), self.dataMetric)
@@ -142,6 +143,8 @@ class GraphSettingForm(qt.QWidget):
         formLayout.addRow(MLabel('Marker Type: '), self.markerType)
         formLayout.addRow(MLabel('Marker Size: '), self.markerSize)
         formLayout.addRow(MLabel('X axis Date Interval: '), self.dateTextInterval)
+        formLayout.addRow(MLabel('Line Width: '), self.lineWidth)
+
         
         formLayout.addRow(self.showGraphButton)
 
@@ -177,6 +180,7 @@ class GraphSettingForm(qt.QWidget):
 
         settings["markerSize"] = self.markerSize.value()
         settings["dateInterval"] = self.dateTextInterval.value()
+        settings["lineWidth"] = self.lineWidth.value()
         
         print(settings)
         return settings

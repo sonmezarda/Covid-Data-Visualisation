@@ -5,19 +5,18 @@ import PyQt5.QtWidgets as qt
 import PyQt5.QtCore as QtCore
 
 from modules.covid_helper import test as covidTest
+from modules.plot_helper import test as pltTest
+
 from modules.covid_helper import CovidHelper
 from modules.plot_helper import PlotHelper
 
-from modules.plot_helper import test as pltTest
-from modules.pyqt_helper import SearchWidget, CountryScroll, MDateEdit, MPushButton, MCombobox, GraphSettingForm
+from modules.pyqt_helper import SearchWidget, CountryScroll,  MPushButton, GraphSettingForm
 
 
 def main():
     app = qt.QApplication([])
     covid = CovidHelper()
-    #window = qt.QWidget()#MainWindow()
     window = MainWindow()
-    #window.setLayout(ly)
     countryScroll = CountryScroll(covid.getCountryList(True, True))
 
     sw = SearchWidget("Country Name: ")
@@ -32,7 +31,8 @@ def main():
     window.main_layout.addWidget(gsettings, 2,2)
 
     window.main_layout.addWidget(testButton, 3,2)
-    gsettings.showGraphButton.clicked.connect(lambda: showGraphButtonClick(gsettings.getSettings(), countryScroll.getCheckedCountries()))
+    gsettings.showGraphButton.clicked.connect(lambda: 
+                                              showGraphButtonClick(gsettings.getSettings(), countryScroll.getCheckedCountries()))
 
     window.show()
     app.exec()
@@ -46,7 +46,7 @@ def showGraphButtonClick(settings, countries):
         df = covid.getDateIntervalbyCountry(settings["startDate"], settings["endDate"], countries, dropIndex=True)
         fig, ax = plt.subplots(1,1)
         fig.autofmt_xdate()
-        plotter.plotBasic(ax, df, plotType=settings["column"], dayTextInterval=settings["dateInterval"], marker=settings["marker"], ms=settings["markerSize"])
+        plotter.plotBasic(ax, df, plotType=settings["column"], dayTextInterval=settings["dateInterval"], linewidth=settings["lineWidth"], marker=settings["marker"], ms=settings["markerSize"])
         plt.show()
 
 class MainWindow(qt.QMainWindow):
@@ -59,16 +59,6 @@ class MainWindow(qt.QMainWindow):
 
         self.setCentralWidget(self.central_widget)
         self.central_widget.setLayout(self.main_layout)
-        
-        # self.dateedit = qt.QDateEdit(calendarPopup=True)
-        # self.menuBar().setCornerWidget(self.dateedit, QtCore.Qt.Corner.TopLeftCorner)
-        # self.dateedit.setDateTime(QtCore.QDateTime.currentDateTime())
-
-
-    def buttonClicked(self):
-        print("Clicked!")
-
-
 
 if __name__ == "__main__":
     main()
